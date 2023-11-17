@@ -10,9 +10,6 @@ const pool = new Pool({
   database: 'lightbnb'
 });
 
-// pool.query(`SELECT title FROM properties LIMIT 10;`)
-//   .then(response => { console.log(response) });
-
 /// Users
 
 /**
@@ -46,28 +43,6 @@ const getUserWithId = function(id) {
       return Promise.reject(err);
     });
 };
-
-// const getUserWithId = function (id) {
-//   return pool
-//     .query(SELECT * FROM users WHERE id = $1, [id])
-//     .then((result) => {
-//       return result.rows[0] || null;
-//     })
-//     .catch((err) => {
-//       return Promise.reject(err);
-//     });
-// };
-
-// const getAllProperties = (options, limit = 10) => {
-// return pool
-//   .query(`SELECT * FROM properties LIMIT $1`, [limit])
-//   .then((result) => {
-//     return result.rows;
-//   })
-//   .catch((err) => {
-//     console.log(err.message);
-//   });
-// };
 
 /**
  * Add a new user to the database.
@@ -121,13 +96,6 @@ const getAllReservations = function(guest_id, limit = 10) {
 //  * @param {*} limit The number of results to return.
 //  * @return {Promise<[{}]>}  A promise to the properties.
 //  */
-// const getAllProperties = function (options, limit = 10) {
-//   const limitedProperties = {};
-//   for (let i = 1; i <= limit; i++) {
-//     limitedProperties[i] = properties[i];
-//   }
-//   return Promise.resolve(limitedProperties);
-// };
 
 const getAllProperties = (options, limit = 10) => {
   console.log(options);
@@ -138,6 +106,7 @@ const getAllProperties = (options, limit = 10) => {
   FROM properties
   JOIN property_reviews ON properties.id = property_id `;
 
+  // add appropriate options to query string
   if (options.city) {
     values.push(`%${options.city}%`);
     conditions.push(`city LIKE $${values.length}`);
@@ -169,7 +138,6 @@ const getAllProperties = (options, limit = 10) => {
     queryString += `HAVING AVG(rating) >= $${values.length} `;
   }
 
-
   // add limit to queryString
   values.push(limit);
   queryString +=
@@ -193,10 +161,47 @@ const getAllProperties = (options, limit = 10) => {
  * @return {Promise<{}>} A promise to the property.
  */
 const addProperty = function(property) {
-  const propertyId = Object.keys(properties).length + 1;
-  property.id = propertyId;
-  properties[propertyId] = property;
-  return Promise.resolve(property);
+  
+  // Collect the property values in the order of the SQL query parameters
+  const values = [
+    property.title,
+    property.description,
+    property.owner_id,
+    property.cover_photo_url,
+    property.thumbnail_photo_url,
+    property.cost_per_night,
+    property.parking_spaces,
+    property.number_of_bathrooms,
+    property.number_of_bedrooms,
+    property.province,
+    property.city,
+    property.country,
+    property.street,
+    property.post_code
+  ];
+  
+  // Construct the SQL query string with parameter placeholders
+  let queryString = `INSERT INTO properties (
+    title, description, owner_id, cover_photo_url, thumbnail_photo_url, cost_per_night, 
+    parking_spaces, number_of_bathrooms, number_of_bedrooms, province, city, 
+    country, street, post_code
+  ) VALUES (`;
+
+  // Dynamically generate placeholders for each value
+  queryString += values.map((_, index) => `$${index + 1}`).join(', ');
+  queryString += ')';
+
+  // queryString += buildQueryParamListFromArrayOfValues(values);
+
+  // Execute the query with the provided values
+  return pool
+    .query(queryString, values)
+    .then((result) => {
+      return result.rows;
+    })
+    .catch((err) => {
+      console.log(err.message);
+    });
 };
 
 module.exports = {
