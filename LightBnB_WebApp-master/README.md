@@ -57,7 +57,7 @@
 
 ## Getting Started
 
-1. To bring the project into your local environment, you'll have to clone the repository using `git clone git@github.com:Hands-on-robotics/LightBnB.git.`
-2. To have all the dependencies installed use command `npm install` in your terminal.
-3. To start up the server use command `npm run local` in your terminal.
+1. To bring the project into your local environment, you'll have to clone the repository from github using the `git clone git@github.com:Hands-on-robotics/LightBnB.git` command in your terminal while in your desired directory.
+2. To install all the dependencies in your local environment, navigate to where the project folder was cloned while in your terminal and use command `npm install`.
+3. To start up the server use command `npm run local` while in the project folder.
 4. Then navigate to http://localhost:3000 in your browser to view the web application.
