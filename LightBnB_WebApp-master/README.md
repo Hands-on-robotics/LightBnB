@@ -53,3 +53,11 @@
 * `routes` contains the router files which are responsible for any HTTP requests to `/users/something` or `/api/something`. 
 * `styles` contains all of the sass files. 
 * `server.js` is the entry point to the application. This connects the routes to the database.
+
+
+## Getting Started
+
+1. To bring the project into your local environment, you'll have to clone the repository using git clone git@github.com:Hands-on-robotics/LightBnB.git.
+2. To have all the dependencies installed use command `npm install` in your terminal.
+3. To start up the server use command `npm run local` in your terminal.
+4. Then navigate to http://localhost:3000 in your browser to view the web application.
