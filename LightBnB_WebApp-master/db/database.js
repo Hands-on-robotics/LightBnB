@@ -188,8 +188,6 @@ const addProperty = function(property) {
   queryString += values.map((_, index) => `$${index + 1}`).join(', ');
   queryString += ')';
 
-  // queryString += buildQueryParamListFromArrayOfValues(values);
-
   // Execute the query with the provided values
   return pool
     .query(queryString, values)
