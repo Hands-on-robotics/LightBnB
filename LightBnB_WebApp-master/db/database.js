@@ -1,6 +1,4 @@
 
-const properties = require("./json/properties.json");
-const users = require("./json/users.json");
 const { Pool } = require('pg');
 
 const pool = new Pool({
@@ -66,10 +64,11 @@ const addUser = function(user) {
 /**
  * Get all reservations for a single user.
  * @param {string} guest_id The id of the user.
+ * @param {number} limit The limit for the number of query results.
  * @return {Promise<[{}]>} A promise to the reservations.
  */
 const getAllReservations = function(guest_id, limit = 10) {
-  const query = `SELECT reservations.id, properties.title, properties.cost_per_night, reservations.start_date, avg(rating) as average_rating
+  const query = `SELECT properties.*, reservations.id, reservations.start_date, avg(rating) as average_rating
   FROM reservations
   JOIN properties ON reservations.property_id = properties.id
   JOIN property_reviews ON properties.id = property_reviews.property_id
@@ -90,21 +89,19 @@ const getAllReservations = function(guest_id, limit = 10) {
 
 /// Properties
 
-// /**
-//  * Get all properties.
-//  * @param {{}} options An object containing query options.
-//  * @param {*} limit The number of results to return.
-//  * @return {Promise<[{}]>}  A promise to the properties.
-//  */
-
+/**
+ * Get all properties.
+ * @param {{}} options An object containing query options.
+ * @param {*} limit The number of results to return.
+ * @return {Promise<[{}]>}  A promise to the properties.
+ */
 const getAllProperties = (options, limit = 10) => {
-  console.log(options);
   const values = [];
   const conditions = [];
 
   let queryString = `SELECT properties.*, avg(property_reviews.rating) as average_rating
   FROM properties
-  JOIN property_reviews ON properties.id = property_id `;
+  LEFT JOIN property_reviews ON properties.id = property_id `;
 
   // add appropriate options to query string
   if (options.city) {
@@ -130,7 +127,7 @@ const getAllProperties = (options, limit = 10) => {
   // check if any where conditions exist, join and add to query
   queryString += conditions.length > 0 ? `WHERE ${conditions.join(' AND ')}` : '';
 
-  queryString += `GROUP BY properties.id `;
+  queryString += ` GROUP BY properties.id `;
 
   // check for rating filter, add to queryString
   if (options.minimum_rating) {
@@ -144,10 +141,10 @@ const getAllProperties = (options, limit = 10) => {
   `ORDER BY cost_per_night
   LIMIT $${values.length};`;
 
-
   return pool
     .query(queryString, values)
     .then((result) => {
+      console.log('result rows: ', result.rows);
       return result.rows;
     })
     .catch((err) => {
